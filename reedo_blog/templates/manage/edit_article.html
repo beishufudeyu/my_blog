@@ -1,0 +1,153 @@
+{% extends "manage/manage_base.html" %}
+{% load staticfiles %}
+{% load my_tags %}
+{% block title %}编辑文章{% endblock %}
+
+{% block css %}
+    {{ form_obj.media }}
+{% endblock %}
+
+{% block left_menu %}
+    <div class="list-group">
+        <a href="#" class="list-group-item disabled">
+            操作
+        </a>
+        <a href="/manage/new_article/" class="list-group-item">添加新博客</a>
+        <a href="/manage/" class="list-group-item">文章列表</a>
+        <a href="/manage/draft/" class="list-group-item">草稿箱</a>
+        <a href="#" class="list-group-item active">编辑文章</a>
+    </div>
+    <div class="list-group">
+        <a href="#" class="list-group-item disabled">
+            分类
+        </a>
+        {% for category in category_list %}
+            <a href="/category/{{ category.id }}/"
+               class="list-group-item">{{ category.title }}({{ category.c }})</a>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="panel panel-default">
+        <div class="panel-heading">编辑文章</div>
+        <div class="panel-body">
+            <form class="form-horizontal" role="form" autocomplete="off" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <label for="id_title"
+                       class="control-label">标题</label>
+                <input type="text" name="title" id="id_title" value="{{ article.title }}" class="form-control">
+                <span class="help-block" id="title_error"></span>
+
+                <strong>内容(Markdown编辑器)</strong>
+                {{ form_obj.content }}
+
+
+                <div class="panel panel-info">
+                    <div class="panel-heading">是否发布</div>
+                    <div class="panel-body">
+                        <label for="id_published">
+                            <input type="checkbox" name="published" id="id_published"
+                                   {% if select_published %}checked{% endif %}>
+                            是否发布
+                        </label>
+                    </div>
+                </div>
+
+                <div class="panel panel-info">
+                    <div class="panel-heading">常用选项</div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <select class="form-control" id="id_category">
+                                    {% for k,v in category %}
+                                        <option value="{{ k }}"
+                                                {% if k == select_category %}selected{% endif %}>{{ v }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-info">
+                    <div class="panel-heading">文章标签</div>
+                    <div class="panel-body" id="tags_checkboxs">
+                        <div class="row">
+                            <div class="col-md-8">标签(多选)：
+                                <ul id="id_tags">
+                                    {% for k,v in tags %}
+                                        <li><input type="checkbox" value="{{ k }}">{{ v }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <div class="col-md-8 col-md-offset-2 text-right">
+                        <button type="button" id="pub_btn" class="btn btn-success btn-block">发布</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{#    <span style="display: none;" id="post_content">{{ article.articledetail.content }}</span>#}
+    <div class="alert alert-danger hidden" role="alert" id="alert_error"></div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static "js/setupajax.js" %}"></script>
+    <script>
+
+        $(document).ready(function () {
+            {# 绑定默认选中标签事件 #}
+            var a_list = "{{ select_tag }}".split(",");
+            {# 遍历选中标签 #}
+            $("#id_tags input").each(function () {
+                for (var i = 0; i < a_list.length; i++) {
+                    var tag_id = $(this).val();
+                    if (tag_id == a_list[i]) {
+                        $(this).prop("checked", true);
+                    }
+                }
+            });
+            $("#id_content").html("{{ content }}");
+        });
+
+        $("#pub_btn").click(function () {
+            var article_id = "{{ article.id }}";
+            var article_content = $("#id_content").val();
+            var tags = [];
+            $('#id_tags').find('input[type=checkbox]').each(function () {
+                if ($(this).prop("checked")) {
+                    var tagId = $(this).val();
+                    tags.push(tagId);
+                }
+            });
+            $.ajax({
+                url: "/manage/change_article/",
+                type: "post",
+                data: {
+                    article_id: article_id,
+                    title: $("#id_title").val(),
+                    published: $("#id_published").is(":checked"),
+                    category: $("#id_category").val(),
+                    tags: tags.toString(),
+                    content: article_content,
+                },
+                success: function (data) {
+                    if (data.status) {
+                        $("#alert_error").removeClass("hidden").text(data.msg);
+                    } else {
+                        location.href = data.msg;
+                    }
+                }
+            })
+        });
+    </script>
+
+{% endblock %}

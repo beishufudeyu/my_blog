@@ -1,0 +1,184 @@
+{% load staticfiles %}
+{% load my_tags %}
+<!doctype html>
+<html lang="zh">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon"/>
+    <title>{% block title %}{% endblock %}</title>
+    <meta name="description" content=""/>
+    <meta name="keywords" content=""/>
+    {#    <link rel="stylesheet" type="text/css" media="screen" href="{% static "css/bootstrap.min.css" %}"/>#}
+    <link rel="stylesheet" type="text/css" href="/static/css/index.css" media="all"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/iconfont.css">
+    {% block css %}
+    {% endblock %}
+</head>
+
+<body class="home blog custom-background round-avatars">
+<div class="Yarn_Background" style="background-image: url(/static/images/47fb3c_.jpg);"></div>
+
+{# 搜索按钮 #}
+<form class="js-search search-form search-form--modal" method="get" action="/search" role="search">
+    <div class="search-form__inner">
+        <div>
+            <div id="search-container" class="ajax_search">
+                <form method="get" id="searchform" action="">
+                    <div class="filter_container"><input tycpe="text" value="" autocomplete="off"
+                                                         placeholder="Type then select or enter" name="s"
+                                                         id="search-input"/>
+                        <ul id="search_filtered" class="search_filtered"></ul>
+                    </div>
+                    <input type="submit" id="searchsubmit" class="searchsubmit" value=""/>
+                </form>
+            </div>
+        </div>
+    </div>
+</form>
+
+{# 导航 #}
+<div class="navi" data-aos="fade-down">
+    <div class="bt-nav">
+        <div class="line line1"></div>
+        <div class="line line2"></div>
+        <div class="line line3"></div>
+    </div>
+    <div class="navbar animated fadeInRight">
+        <div class="inner">
+            <nav id="site-navigation" class="main-navigation">
+                <div id="main-menu" class="main-menu-container">
+                    <div class="menu-menu-container">
+                        <ul id="primary-menu" class="menu">
+                            <li id="menu-item-17"
+                                class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-17">
+                                <a href="/">首页</a>
+                            </li>
+
+                            <li id="menu-item-79"
+                                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-79">
+                                <a href="/dates/">日期归档</a>
+                            </li>
+                            {% category_bar %}
+                            {% tag_bar %}
+                            <li id="menu-item-56"
+                                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-56">
+                                <a href="/manage/">管理</a>
+                            </li>
+                            <li id="menu-item-57"
+                                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-57">
+                                <a href="/gustbook/">留言板</a>
+                            </li>
+                            <li id="menu-item-78"
+                                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-78">
+                                <a href="/about_me/">关于我</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            <!-- #site-navigation -->
+        </div>
+    </div>
+</div>
+<div class="hebin" data-aos="fade-down">
+    <i class=" js-toggle-search iconfont icon-search"></i>
+</div>
+{# 标头 #}
+<header id="masthead" class="overlay animated from-bottom" itemprop="brand">
+    <div class="site-branding text-center">
+        {% if request.user.username %}
+            <a href="#">
+                <figure>
+                    <img class="custom-logo avatar" src="/media/{{ request.user.avatar }}"/>
+                </figure>
+            </a>
+            <h3 class="blog-description"><p>{{ request.user.username }}</p></h3>
+        {% else %}
+            <a href="#">
+                <figure>
+                    <img class="custom-logo avatar" src="/static/images/omikron.png"/>
+                </figure>
+            </a>
+            <h3 class="blog-description"><p>anonymous</p></h3>
+        {% endif %}
+    </div>
+    <!-- .site-branding -->
+    <div class="decor-part">
+        <div id="particles-js"></div>
+    </div>
+    <div class="animation-header">
+        <div class="decor-wrapper">
+            <svg id="header-decor" class="decor bottom" xmlns="http://www.w3.org/2000/svg" version="1.1"
+                 viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path class="large left" d="M0 0 L50 50 L0 100" fill="rgba(255,255,255, .1)"></path>
+                <path class="large right" d="M100 0 L50 50 L100 100" fill="rgba(255,255,255, .1)"></path>
+                <path class="medium left" d="M0 100 L50 50 L0 33.3" fill="rgba(255,255,255, .3)"></path>
+                <path class="medium right" d="M100 100 L50 50 L100 33.3" fill="rgba(255,255,255, .3)"></path>
+                <path class="small left" d="M0 100 L50 50 L0 66.6" fill="rgba(255,255,255, .5)"></path>
+                <path class="small right" d="M100 100 L50 50 L100 66.6" fill="rgba(255,255,255, .5)"></path>
+                <path d="M0 99.9 L50 49.9 L100 99.9 L0 99.9" fill="rgba(255,255,255, 1)"></path>
+                <path d="M48 52 L50 49 L52 52 L48 52" fill="rgba(255,255,255, 1)"></path>
+            </svg>
+        </div>
+    </div>
+</header>
+
+<div id="main" class="content">
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+
+        {% block pagination %}
+        {% endblock %}
+    </div>
+</div>
+
+{# 底部 #}
+<footer id="footer" class="overlay animated from-top">
+    <div class="decor-wrapper">
+        <svg id="footer-decor" class="decor top" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100"
+             preserveAspectRatio="none">
+            <path class="large left" d="M0 0 L50 50 L0 100" fill="rgba(255,255,255, .1)"></path>
+            <path class="large right" d="M100 0 L50 50 L100 100" fill="rgba(255,255,255, .1)"></path>
+            <path class="medium left" d="M0 0 L50 50 L0 66.6" fill="rgba(255,255,255, .3)"></path>
+            <path class="medium right" d="M100 0 L50 50 L100 66.6" fill="rgba(255,255,255, .3)"></path>
+            <path class="small left" d="M0 0 L50 50 L0 33.3" fill="rgba(255,255,255, .5)"></path>
+            <path class="small right" d="M100 0 L50 50 L100 33.3" fill="rgba(255,255,255, .5)"></path>
+            <path d="M0 0 L50 50 L100 0 L0 0" fill="rgba(255,255,255, 1)"></path>
+            <path d="M48 48 L50 51 L52 48 L48 48" fill="rgba(255,255,255, 1)"></path>
+        </svg>
+    </div>
+    <div class="socialize" data-aos="zoom-in">
+        <li>
+            <a title="GitHub" class="socialicon" href="https://github.com/beishufudeyu"><i class="iconfont icon-github"
+                                                                                           aria-hidden="true"></i></a>
+        </li>
+        <li class="wechat">
+            <a class="socialicon"><i class="iconfont icon-wechat" aria-hidden="true"></i></a>
+            <div class="wechatimg"><img src="/static/images/my_wechat.jpg"></div>
+        </li>
+        <li>
+            <a title="mmvtc" class="socialicon" href="http://www.mmvtc.cn/templet/default/index.jsp" target="_blank"><i
+                    class="iconfont icon-xuexiao" aria-hidden="true"></i></a>
+        </li>
+    </div>
+
+    <div class="cr">
+        mmvtc&copy;2018. Design by
+        <a href="">陈煜</a>
+    </div>
+</footer>
+
+<script type='text/javascript' src='/static/js/jquery.min.js'></script>
+<script src="{% static "js/bootstrap.min.js" %}"></script>
+<script type='text/javascript' src='/static/js/plugins.js'></script>
+<script type='text/javascript' src='/static/js/script.js'></script>
+<script type='text/javascript' src='/static/js/particles.js'></script>
+<script type='text/javascript' src='/static/js/aos.js'></script>
+{% block js %}
+{% endblock %}
+</body>
+
+</html>

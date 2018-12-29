@@ -1,0 +1,133 @@
+{% extends "manage/manage_base.html" %}
+{% load staticfiles %}
+{% block title %}添加文章{% endblock %}
+
+{% block css %}
+    {{ form_obj.media }}
+    <style>
+        #id_content {
+            height: 350px;
+            width: 100%;
+            width: 100%;
+            min-width: 500px;
+        }
+
+        .wmd-panel {
+            margin-left: 0%;
+            margin-right: 0%;
+            width: 100%;
+            min-width: 50%;
+        }
+    </style>
+{% endblock %}
+
+{% block left_menu %}
+    <div class="list-group">
+        <a href="#" class="list-group-item disabled">
+            操作
+        </a>
+        <a href="#" class="list-group-item active">添加新博客</a>
+        <a href="/manage/" class="list-group-item">文章列表</a>
+        <a href="/manage/draft/" class="list-group-item">草稿箱</a>
+    </div>
+    <div class="list-group">
+        <a href="#" class="list-group-item disabled">
+            分类
+        </a>
+        {% for category in category_list %}
+            <a href="/category/{{ category.id }}/"
+               class="list-group-item">{{ category.title }}({{ category.c }})</a>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="panel panel-default">
+        <div class="panel-heading">添加文章</div>
+        <div class="panel-body">
+            <form class="form-horizontal" role="form" autocomplete="off" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <label for="{{ form_obj.title.id_for_label }}"
+                       class="control-label">{{ form_obj.title.label }}</label>
+                {{ form_obj.title }}
+                <span class="help-block">{{ form_obj.title.errors.0 }}</span>
+
+                <label for="{{ form_obj.content.id_for_label }}">{{ form_obj.content.label }}</label>
+                {{ form_obj.content }}
+
+
+                <div class="panel panel-info">
+                    <div class="panel-heading">是否发布</div>
+                    <div class="panel-body">
+                        <div class="checkbox">
+                            <label for="{{ form_obj.published.id_for_label }}">
+                                {{ form_obj.published }}
+                                {{ form_obj.published.label }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-info">
+                    <div class="panel-heading">常用选项</div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-6">{{ form_obj.category.label }}：{{ form_obj.category }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-info">
+                    <div class="panel-heading">文章标签</div>
+                    <div class="panel-body" id="tags_checkboxs">
+                        <div class="row">
+                            <div class="col-md-8">{{ form_obj.tags.label }}(多选)：{{ form_obj.tags }}</div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <div class="col-md-7 col-md-offset-3 text-right">
+                        <button type="button" id="pub_btn" class="btn btn-success btn-block">发布</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="alert alert-danger hidden" role="alert" id="alert_error"></div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static "js/setupajax.js" %}"></script>
+    <script>
+        $("#pub_btn").click(function () {
+            var tags = [];
+            $('#id_tags').find('input[type=checkbox]').each(function () {
+                if ($(this).prop("checked")) {
+                    var tagId = $(this).val();
+                    tags.push(tagId);
+                }
+            });
+            $.ajax({
+                url: "/manage/new_article/",
+                type: "post",
+                data: {
+                    title: $("#id_title").val(),
+                    published: $("#id_published").is(":checked"),
+                    category: $("#id_category").val(),
+                    tags: tags.toString(),
+                    content: $("#id_content").val(),
+                },
+                success: function (data) {
+                    if (data.status) {
+                        $("#alert_error").removeClass("hidden").text(data.msg);
+                    } else {
+                        location.href = data.msg;
+                    }
+                }
+            })
+        });
+    </script>
+{% endblock %}

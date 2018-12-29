@@ -1,0 +1,97 @@
+{% extends "articles/article_base.html" %}
+{% load staticfiles %}
+{% load my_tags %}
+{% block title %}
+    {{ title }}
+{% endblock %}
+{% block content %}
+    <article itemscope="itemscope">
+        <div class="posts-list js-posts">
+
+            {% for article in article_list %}
+                {% if forloop.counter|remainder != 0 %}
+                    <div class="post post-layout-list" data-aos="fade-up">
+                        <div class="status_list_item icon_kyubo">
+                            <div class="status_user"
+                                 style="background-image: url(/static/images/b0ce3f3cde0c084b6d42321b2dcbc407.jpeg);">
+                                <div class="status_section">
+                                    <a href="/article/{{ article.id }}/" class="status_btn">{{ article.title }}</a>
+                                    <p class="section_p">{{ article.desc }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="post post-layout-list" data-aos="fade-up">
+                        <div class="postnormal review ">
+                            <div class="post-container review-item">
+                                <div class="row review-item-wrapper">
+                                    <div class="col-sm-3">
+                                        <a rel="nofollow" href="detail.html">
+                                            <div class="review-item-img"
+                                                 style="background-image: url(/static/images/diego-ph-249471-2-800x1000.jpg);"></div>
+                                        </a>
+                                    </div>
+                                    <div class="col-sm-9 flex-xs-middle">
+                                        <div class="review-item-title">
+                                            <a href="/article/{{ article.id }}/"
+                                               class="status_btn">{{ article.title }}</a>
+                                        </div>
+                                        <div class="review-item-creator">
+                                            <b>发布日期：</b>{{ article.create_time|date:"Y-m-d" }}</div>
+                                        <span class="review-item-info"><b>总浏览量：</b>{{ article.read_num }} reads</span>
+                                    </div>
+                                </div>
+                                <div class="review-bg-wrapper">
+                                    <div class="bg-blur"
+                                         style="background-image: url(/static/images/diego-ph-249471-2-800x1000.jpg);"></div>
+                                </div>
+                            </div>
+                            <div class="post-container">
+                                <div class="entry-content">
+                                    {{ article.desc }}
+                                </div>
+                                <div class="post-footer">
+                                    <a class="gaz-btn primary" href="/article/{{ article.id }}/">READ MORE</a>
+                                    <span class="total-comments-on-post pull-right"><a
+                                            href="">{{ article.comment_count }} Comments</a></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+
+        </div>
+    </article>
+{% endblock %}
+{% block pagination %}
+    <nav id="comments-navi">
+        {% if article_list.has_previous %}
+            <a class="prev page-numbers" href="?page={{ article_list.previous_page_number }}">
+                <</a>
+        {% else %}
+            <span class="prev page-numbers">
+                            <</span>
+        {% endif %}
+        {% for page_num in page_range %}
+            {% if page_num == current_page_num %}
+                <span aria-current='page' class='page-numbers current'>{{ page_num }}</span>
+            {% else %}
+                {% if page_num == '...' %}
+                    <span class="page-numbers dots">&hellip;</span>
+                {% else %}
+                    <a class='page-numbers' href="?page={{ page_num }}">{{ page_num }}</a>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        {% if comment_list.has_next %}
+            <a class="prev page-numbers" href="?page={{ article_list.next_page_number }}">
+                ></a>
+        {% else %}
+            <span class="prev page-numbers">
+                            ></span>
+        {% endif %}
+    </nav>
+{% endblock %}

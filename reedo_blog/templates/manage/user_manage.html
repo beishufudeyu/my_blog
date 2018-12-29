@@ -1,0 +1,158 @@
+{% extends "manage/manage_base.html" %}
+{% load staticfiles %}
+{% block title %}我的空间{% endblock %}
+{% block left_menu %}
+    <div class="list-group">
+        <a href="#" class="list-group-item disabled">
+            操作
+        </a>
+
+        <a href="/manage/new_article/" class="list-group-item">添加新博客</a>
+        <a href="/manage/" class="list-group-item active">文章列表</a>
+        <a href="/manage/draft/" class="list-group-item">草稿箱</a>
+    </div>
+    <div class="list-group">
+        <a href="#" class="list-group-item disabled">
+            操作
+        </a>
+        {% for category in category_list %}
+            <a href="/category/{{ category.id }}/"
+               class="list-group-item">{{ category.title }}({{ category.c }})</a>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="panel panel-default">
+        <div class="panel-heading">文章信息</div>
+        <div class="panel-body">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>标题</th>
+                    <th>发布状态</th>
+                    <th>评论数</th>
+                    <th>点赞数</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for article in article_list %}
+                    <tr>
+                        <td>{{ article.title|truncatechars:18 }}&nbsp;({{ article.create_time|date:"Y-m-d H:i" }})</td>
+                        <td>
+                            {% if article.published %}
+                                发布
+                            {% else %}
+                                草稿
+                            {% endif %}
+                        </td>
+                        <td>{{ article.comment_count }}</td>
+                        <td>{{ article.up_count }}</td>
+                        <td>
+                            <button type="button" class="btn btn-info btn-xs dispub_btn">取消发布</button>
+                            <a type="button" class="btn btn-info btn-xs edit_btn" href="/manage/edit/{{ article.id }}/">编辑</a>
+                            <button type="button" class="btn btn-danger btn-xs delete_btn">删除</button>
+                        </td>
+                        <td class="info hidden" article_id="{{ article.id }}"
+                            username="{{ request.user.username }}"></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="alert alert-danger hidden" role="alert" id="alert_error"></div>
+    <div class="alert alert-success hidden" role="alert" id="alert_success"></div>
+{% endblock %}
+{% block paginator %}
+    <nav aria-label="Page navigation" class="pull-right">
+        <ul class="pagination">
+            {% if page_of_blogs.has_previous %}
+                <li>
+                    <a href="?page={{ page_of_blogs.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% else %}
+                <li class="disabled">
+                    <a aria-label="Previous" disabled>
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+            {% for page_num in page_range %}
+                {% if page_num == current_page_num %}
+                    <li class="active disabled"><a href="?page={{ page_num }}">{{ page_num }}</a></li>
+                {% else %}
+                    {% if page_num == '...' %}
+                        <li class="disabled"><a>{{ page_num }}</a></li>
+                    {% else %}
+                        <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            {% if page_of_blogs.has_next %}
+                <li>
+                    <a href="?page={{ page_of_blogs.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            {% else %}
+                <li class="disabled">
+                    <a aria-label="Next" disabled>
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endblock %}
+{% block js %}
+    <script src="{% static "js/setupajax.js" %}"></script>
+    <script>
+        $(".delete_btn").click(function () {
+
+            var info_elm = $(this).parent("td").next(".info");
+            var del_btn = $(this);
+            $.ajax({
+                url: "/manage/delete/",
+                type: "post",
+                data: {
+                    article_id: info_elm.attr("article_id"),
+                },
+                success: function (data) {
+                    if (data.error) {
+                        $("#alert_error").removeClass("hidden").text(data.error);
+                    } else {
+                        del_btn.parent().parent().remove();
+                    }
+                }
+            })
+        });
+
+
+        $(".dispub_btn").click(function () {
+
+            var info_elm = $(this).parent("td").next(".info");
+            var pub_btn = $(this);
+            $.ajax({
+                url: "/manage/dispublish/",
+                type: "post",
+                data: {
+                    article_id: info_elm.attr("article_id"),
+                },
+                success: function (data) {
+                    if (data.error) {
+                        $("#alert_error").removeClass("hidden").text(data.error);
+                    } else {
+                        pub_btn.parent().parent().remove();
+                        $("#alert_success").removeClass("hidden").text(data.img);
+                    }
+                }
+            })
+        });
+
+    </script>
+
+{% endblock %}

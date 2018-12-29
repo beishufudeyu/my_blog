@@ -1,0 +1,11 @@
+<li id="menu-item-253"
+    class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-253">
+    <a href="#">分类</a>
+    <ul class="sub-menu">
+        {% for category in category_list %}
+            <li id="menu-item-165" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-165">
+                <a href="/category/{{ category.id }}/">{{ category.title }}({{ category.c }})</a>
+            </li>
+        {% endfor %}
+    </ul>
+</li>

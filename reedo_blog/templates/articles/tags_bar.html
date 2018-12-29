@@ -1,0 +1,11 @@
+<li id="menu-item-254"
+    class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-254">
+    <a href="#">标签</a>
+    <ul class="sub-menu">
+        {% for tag in tag_list %}
+            <li id="menu-item-165" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-165">
+                <a href="/tags/{{ tag.id }}/">{{ tag.title }}({{ tag.c }})</a>
+            </li>
+        {% endfor %}
+    </ul>
+</li>

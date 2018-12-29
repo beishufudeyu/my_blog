@@ -1,0 +1,191 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon" />
+    <title>注册</title>
+    <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
+    <link rel="stylesheet" href="{% static "css/common.css" %}">
+</head>
+<body style="background: url('/static/images/memphis-colorful.png');">
+
+<!-- Body -->
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            {# 登陆logo #}
+            <div class="header">
+                <div class="text-center m-b-15">
+                    <a href="/"><img src="{% static "images/redash_icon_small.png" %}"
+                                     id="login_logo"></a>
+                </div>
+
+                <h3 class="text-center m-t-0 m-b-25" style="margin-bottom: 20px;">Login to Redash</h3>
+            </div>
+
+            {# 登陆form #}
+            <form class="form-horizontal" role="form" autocomplete="off" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="{{ form_obj.username.id_for_label }}"
+                           class="col-md-2 col-md-offset-1">{{ form_obj.username.label }}</label>
+                    <div class="col-md-7">
+                        {{ form_obj.username }}
+                        <span class="help-block">{{ form_obj.username.errors.0 }}</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form_obj.password.id_for_label }}"
+                           class="col-md-2 col-md-offset-1">{{ form_obj.password.label }}</label>
+                    <div class="col-md-7">
+                        {{ form_obj.password }}
+                        <span class="help-block">{{ form_obj.password.errors.0 }}</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form_obj.re_password.id_for_label }}"
+                           class="col-md-2 col-md-offset-1">{{ form_obj.re_password.label }}</label>
+                    <div class="col-md-7">
+                        {{ form_obj.re_password }}
+                        <span class="help-block">{{ form_obj.re_password.errors.0 }}</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form_obj.email.id_for_label }}"
+                           class="col-md-2 col-md-offset-1">{{ form_obj.email.label }}</label>
+                    <div class="col-md-7">
+                        {{ form_obj.email }}
+                        <span class="help-block">{{ form_obj.email.errors.0 }}</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-2 col-md-offset-1">头像</label>
+                    <div class="col-md-7">
+                        <label for="id_avatar"><img id="avatar-img" src="{% static "images/default.png" %}"
+                                                    alt="头像图片"></label>
+                        <input accept="image/*" type="file" name="avatar" id="id_avatar" style="display: none">
+                        <span class="help-block"></span>
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <div class="col-md-7 col-md-offset-3 text-right">
+                        <button type="button" id="reg-button" class="btn btn-primary btn-block">注册</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <hr/>
+        <p class="text-center">Copyright &copy; Astrospace 2018. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="{% static "js/jquery-3.2.1.min.js" %}"></script>
+<script src="{% static "js/bootstrap.min.js" %}"></script>
+<!-- 引入封装了failback的接口--initGeetest -->
+<script src="{% static "js/setupajax.js" %}"></script>
+<script>
+
+    // 找到头像的input标签绑定change事件
+    $("#id_avatar").change(function () {
+        // 1. 创建一个读取文件的对象
+        var fileReader = new FileReader();
+        // 取到当前选中的头像文件
+        console.log(this.files[0]);
+        // 读取你选中的那个文件
+        fileReader.readAsDataURL(this.files[0]);  // 读取文件是需要时间的
+        fileReader.onload = function () {
+            // 2. 等上一步读完文件之后才 把图片加载到img标签中
+            $("#avatar-img").attr("src", fileReader.result);
+        };
+    });
+
+    {# 用户命是否已注册判断 #}
+    $("#id_username").blur(function () {
+        $.ajax({
+            url: "/check_username_exist/",
+            type: "get",
+            data: {"username": $(this).val()},
+            success: function (data) {
+                if (data.status) {
+                    // 用户名已被注册
+                    $("#id_username").next().text(data.msg).parent().parent().addClass("has-error");
+                }
+            }
+        })
+    });
+
+    {# 邮箱是否已注册判断 #}
+    $("#id_email").blur(function () {
+        $.ajax({
+            url: "/check_email_exist/",
+            type: "get",
+            data: {"email": $(this).val()},
+            success: function (data) {
+                if (data.status) {
+                    // 用户名已被注册
+                    $("#id_email").next().text(data.msg).parent().parent().addClass("has-error");
+                }
+            }
+        })
+    });
+
+
+    {# 注册ajax提交 #}
+    $("#reg-button").click(function () {
+        // 取到用户填写的注册数据，向后端发送AJAX请求
+        var formData = new FormData();
+        formData.append("username", $("#id_username").val());
+        formData.append("password", $("#id_password").val());
+        formData.append("re_password", $("#id_re_password").val());
+        formData.append("email", $("#id_email").val());
+        formData.append("avatar", $("#id_avatar")[0].files[0]);
+        formData.append("response", $('#id_captcha_1').val());
+        formData.append("hashkey", $('#id_captcha_0').val());
+
+        $.ajax({
+            url: "/register/",
+            type: "POST",
+            processData: false,
+            contentType: false,
+            data: formData,
+            success: function (data) {
+                if (data.captcha) {
+                    $(".captcha_error").text(data.msg)
+                }
+                else if (data.status) {
+                    // 将报错信息填写到页面上
+                    $.each(data.msg, function (k, v) {
+                        $("#id_" + k).next("span").text(v[0]).parent().parent().addClass("has-error");
+                    })
+
+                } else {
+                    // 没有错误就跳转到指定页面
+                    location.href = data.msg;
+                }
+            }
+        })
+    });
+
+    // 将所有的input框绑定获取焦点的事件，将所有的错误信息清空
+    $("form input").focus(function () {
+        $(this).next().text("").parent().parent().removeClass("has-error");
+    });
+</script>
+</body>
+</html>

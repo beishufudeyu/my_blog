@@ -1,0 +1,166 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon" />
+    <title>登陆</title>
+    <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
+    <link rel="stylesheet" href="{% static "css/common.css" %}">
+</head>
+<body style="background: url('/static/images/memphis-colorful.png');">
+
+<!-- Body -->
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            {# 登陆logo #}
+            <div class="header">
+                <div class="text-center m-b-15">
+                    <a href="/"><img src="{% static "images/redash_icon_small.png" %}"
+                                     id="login_logo"></a>
+                </div>
+
+                <h3 class="text-center m-t-0 m-b-25" style="margin-bottom: 20px;">Login to Redash</h3>
+            </div>
+
+            {# 登陆form #}
+            <form class="form-horizontal" role="form" autocomplete="off">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="username" class="col-md-2 col-md-offset-1">用户名</label>
+                    <div class="col-md-7">
+                        <input type="text" class="form-control" id="username" name="username"
+                               placeholder="用户名/邮箱">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <!-- 错误信息 -->
+                    <div class="col-md-offset-3 col-md-7">
+                        <span class="text-danger login-error"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="col-md-2 col-md-offset-1">密码</label>
+                    <div class="col-md-7">
+                        <input type="password" class="form-control" id="password" name="password"
+                               placeholder="密码">
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <div class="col-md-offset-3 col-md-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" name="remember_me" id="is_remember_me">记住我
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <!-- 极验验证码 -->
+                    <div id="popup-captcha"></div>
+                </div>
+
+
+                <div class="form-group">
+                    <div class="col-md-7 col-md-offset-3 text-right">
+                        <button type="button" id="login-button" class="btn btn-primary btn-block">登陆</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<!-- Footer -->
+<footer style="margin-top: 120px;">
+    <div class="container">
+        <hr/>
+        <p class="text-center">Copyright &copy; Astrospace 2018. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="{% static "js/jquery-3.2.1.min.js" %}"></script>
+<script src="{% static "js/bootstrap.min.js" %}"></script>
+<!-- 引入封装了failback的接口--initGeetest -->
+<script src="http://static.geetest.com/static/tools/gt.js"></script>
+<script src="{% static "js/setupajax.js" %}"></script>
+<script>
+    // 极验 发送登录数据的
+    var handlerPopup = function (captchaObj) {
+        // 成功的回调
+        captchaObj.onSuccess(function () {
+            var validate = captchaObj.getValidate();
+            // 1. 取到用户填写的用户名和密码 -> 取input框的值
+            var username = $("#username").val();
+            var password = $("#password").val();
+            var remember_me = $("#is_remember_me").is(":checked")
+            $.ajax({
+                url: "/login/", // 进行二次验证
+                type: "post",
+                dataType: "json",
+                data: {
+                    username: username,
+                    password: password,
+                    remember_me: remember_me,
+                    geetest_challenge: validate.geetest_challenge,
+                    geetest_validate: validate.geetest_validate,
+                    geetest_seccode: validate.geetest_seccode
+                },
+                success: function (data) {
+                    if (data.status) {
+                        // 有错误，在页面上提示
+                        $(".login-error").text(data.msg);
+                    } else {
+                        // 登陆成功
+                        location.href = data.msg;
+                    }
+                }
+            });
+        });
+
+        $("#login-button").click(function () {
+            captchaObj.show();
+        });
+        // 将验证码加到id为captcha的元素里
+        captchaObj.appendTo("#popup-captcha");
+        // 更多接口参考：http://www.geetest.com/install/sections/idx-client-sdk.html
+    };
+
+    // 当input框获取焦点时将之前的错误清空
+    $("#username,#password").focus(function () {
+        // 将之前的错误清空
+        $(".login-error").text("");
+    });
+
+    // 验证开始需要向网站主后台获取id，challenge，success（是否启用failback）
+    $.ajax({
+        url: "/pc-geetest/register?t=" + (new Date()).getTime(), // 加随机数防止缓存
+        type: "get",
+        dataType: "json",
+        success: function (data) {
+            // 使用initGeetest接口
+            // 参数1：配置参数
+            // 参数2：回调，回调的第一个参数验证码对象，之后可以使用它做appendTo之类的事件
+            initGeetest({
+                gt: data.gt,
+                challenge: data.challenge,
+                product: "popup", // 产品形式，包括：float，embed，popup。注意只对PC版验证码有效
+                offline: !data.success // 表示用户后台检测极验服务器是否宕机，一般不需要关注
+                // 更多配置参数请参见：http://www.geetest.com/install/sections/idx-client-sdk.html#config
+            }, handlerPopup);
+        }
+    })
+
+
+</script>
+</body>
+</html>

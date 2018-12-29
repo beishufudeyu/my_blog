@@ -1,0 +1,32 @@
+{% extends "articles/article_base.html" %}
+{% load staticfiles %}
+{% block title %}
+    日期归档
+{% endblock %}
+
+{% block content %}
+    <section class="post_content" itemscope itemtype="http://schema.org/Article">
+        <header class="post_header">
+            <h1 class="post_title">归档</h1>
+        </header>
+
+        <div class="post-Archive">
+            <div id="archives">
+
+                {% for date,articles in article_dict.items %}
+                    <div class='archive-title' id='arti-{{ date }}'>
+                        <h3>{{ date }}</h3>
+                        <div class='archives archives-3' data-date='{{ date }}'>
+                            {% for article in articles %}
+                                <div class="brick">
+                                    <a href="/article/{{ article.id }}/"><span
+                                            class="time">{{ article.create_time|date:"m-d" }}</span>{{ article.title }}<span>({{ article.comment_count }})</span></a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endblock %}

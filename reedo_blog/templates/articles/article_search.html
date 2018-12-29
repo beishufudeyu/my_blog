@@ -1,0 +1,79 @@
+{% extends "articles/article_base.html" %}
+{% block title %}
+    搜索页
+{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">以&ldquo;{{ s_name }}&rdquo;为关键字</h1>
+
+    <p class="Searchmeta">共计 {{ count_num }} 篇文章</p>
+
+    <div class="location">当前位置：
+        <a href="">首页</a> &raquo; 搜索结果 &raquo; {{ s_name }}
+    </div>
+
+    {% for article in article_list %}
+        <div class="posts-list js-posts">
+
+            <div class="archive-post">
+
+                <div class="type">
+                    <div class="mask"><i class="iconfont">&#xe603;</i></div>
+                </div>
+
+                <h2 class="archive-title" style="color: #30a35d;">
+
+					<span>
+
+					<a href="">{{ article.title }}</a>
+
+					</span>
+
+                    <div class="post-time">{{ article.create_time|date:"Y/m/d" }}</div>
+
+                </h2>
+
+                <div class="post-category">
+                    <a href="/category/{{ category.id }}/" rel="category tag">{{ article.category.title }}</a>
+                </div>
+
+            </div>
+
+        </div>
+    {% endfor %}
+
+    <div class="mt+">
+        <div class="pagination js-pagination">
+
+            <nav id="comments-navi">
+                {% if comment_list.has_previous %}
+                    <a class="prev page-numbers" href="?page={{ comment_list.previous_page_number }}">
+                        <</a>
+                {% else %}
+                    <span class="prev page-numbers">
+                            <</span>
+                {% endif %}
+                {% for page_num in page_range %}
+                    {% if page_num == current_page_num %}
+                        <span aria-current='page' class='page-numbers current'>{{ page_num }}</span>
+                    {% else %}
+                        {% if page_num == '...' %}
+                            <span class="page-numbers dots">&hellip;</span>
+                        {% else %}
+                            <a class='page-numbers' href="?page={{ page_num }}">{{ page_num }}</a>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                {% if comment_list.has_next %}
+                    <a class="prev page-numbers" href="?page={{ comment_list.next_page_number }}">
+                        ></a>
+                {% else %}
+                    <span class="prev page-numbers">
+                            ></span>
+                {% endif %}
+            </nav>
+
+        </div>
+    </div>
+
+{% endblock %}
